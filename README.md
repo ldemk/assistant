@@ -1,5 +1,5 @@
 # AssistanT
-The Turtlebot3 project
+The Turtlebot3 assistant project.
 
 # Docker Installation
 Install Desktop OS Ubuntu 16.04 LTS
