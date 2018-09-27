@@ -11,7 +11,7 @@ Install Docker-CE using the following [instructions](https://docs.docker.com/eng
 The first time You start the docker, You have to execute the following command
 
 ```
-docker run -it --name assistant_turtle_dev -p 8080:8080 -p 8090:8090 -p 9090:9090 -e DISPLAY -e LOCAL_USER_ID=$(id -u) -v /tmp/.X11-unix:/tmp/.X11-unix:rw lyubomyrd/sssistant:latest
+docker run -it --name assistant_turtle_dev -p 8080:8080 -p 8090:8090 -p 9090:9090 -e DISPLAY -e LOCAL_USER_ID=$(id -u) -v /tmp/.X11-unix:/tmp/.X11-unix:rw lyubomyrd/assistant:latest
 ```
 
 # Docker run
