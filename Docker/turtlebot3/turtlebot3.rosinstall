@@ -12,8 +12,3 @@
     uri: https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
     version: kinetic-devel
     local-name: turtlebot3_msgs
-	
-- git:
-    uri: https://github.com/ldemk/assistant.git
-    version: kinetic-devel
-    local-name: assistant
