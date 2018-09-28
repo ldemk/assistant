@@ -3,13 +3,10 @@ project(assistant_launch)
 
 find_package(catkin REQUIRED)
 
-catkin_package(
-  CATKIN_DEPENDS assistant_gazebo turtlebot3_slam
-)
+#catkin_package(
+# CATKIN_DEPENDS assistant_gazebo
+#)
 
-install(FILES
-  launch/rviz.launch
-  launch/simulation.launch
-  launch/view_urdf.launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+#install(FILES
+#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
