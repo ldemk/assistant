@@ -44,7 +44,7 @@ To execute the bringup sequence You have to perform the following steps:
 
 Connect to RPI (note that IP address might be different - this depends on network settings)
 
-2R) ssh pi@192.168.43.84
+2R) ssh pi@192.168.43.216
 
 (Password: turtlebot)
 
