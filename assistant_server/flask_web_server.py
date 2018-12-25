@@ -10,20 +10,19 @@ app.secret_key = "super secret key"
 
 @app.route('/', methods=["GET", "POST"])
 def start():
-    cookie_username = request.cookies.get('username')
-    return render_template("main.html", mssg = cookie_username)
+    # cookie_username = request.cookies.get('username')
+    return render_template("main.html", mssg = "cookie_username")
 
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
+    if request.method == "POST":
         if not auth_error(request.form.get("user_name"), request.form.get("password")):
             # Authentication successful.
             return render_template("search.html")
         else:
             return render_template('main.html', mssg = "Wrong passwod or userame, try again.")
-        # mssg = "Wrong password or username, try again."
-    return render_template('main.html')
+    return render_template('main.html', mssg="Wrong password or username, try again.")
 
 
 if __name__ == '__main__':

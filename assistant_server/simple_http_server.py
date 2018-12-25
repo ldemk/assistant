@@ -2,7 +2,7 @@ import SimpleHTTPServer
 import SocketServer
 from urlparse import urlparse, parse_qsl
 
-PORT = 8080
+PORT = 5000
 FRONT_FILE = "/main.html"
 SEARCH_FILE = "/search.html"
 
@@ -16,6 +16,7 @@ class CustomHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         else:
             form_url = urlparse(self.path)
             url_params= dict(parse_qsl(form_url.query))
+            print(url_params)
             try:
                 # Define next page -- open search page only if authenticated.
                 self.path = SEARCH_FILE if self.__authenticate(url_params) else FRONT_FILE
