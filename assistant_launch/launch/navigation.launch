@@ -1,0 +1,7 @@
+<launch>
+    <arg name="map_file" default="office"/>
+    <include file="$(find turtlebot3_navigation)/launch/turtlebot3_navigation.launch">
+        <!--default="/home/user/workspace/turtlebot3/base/src/assistant/assistant_navigation/maps/hector_suc6.yaml"-->
+        <arg name="map_file" value="$(find assistant_gazebo)/maps/$(arg map_file).yaml"/>
+    </include>
+</launch>

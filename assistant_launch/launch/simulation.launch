@@ -1,0 +1,5 @@
+<launch>
+    <arg name="world_file" default="office"/>
+    <include file="$(find assistant_gazebo)/launch/gazebo.launch">
+    </include>
+</launch>
