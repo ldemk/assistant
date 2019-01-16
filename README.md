@@ -87,6 +87,7 @@ See wiki for Troubleshooting
 # Start working with assistant
 
 1. ``` roscore ```  
+``` ssh pi@192.168.43.216```  
 ``` roslaunch turtlebot3_bringup turtlebot3_robot.launch ```  
 ``` roslaunch turtlebot3_bringup turtlebot3_remote.launch ```  
 
