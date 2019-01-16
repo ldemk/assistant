@@ -83,3 +83,23 @@ Type pycharm to run PyCharm-community
 
 # Troubleshooting
 See wiki for Troubleshooting
+
+# Start working with assistant
+1) # Turtlebot start
+2) roslaunch assistant_launch navigation.launch map_file:=/*name_of_map_file_in_/home/user/workspace/turtlebot3/base/src/assistant/assistant_gazebo/maps/ directory*/
+4) # Teleoperation || rosrun assistant_action main_script.py
+
+
+# Working in Simulation
+1R) roscore
+
+2R) roslaunch assistant_launch simulation.launch
+Launch gazebo simulation for a turtlebot in the testing world (for now - ucu_test.world).
+
+3R) roslaunch assistant_launch navigation.launch map_file:=/*name_of_map_file_in_/home/user/workspace/turtlebot3/base/src/assistant/assistant_gazebo/maps directory*/
+
+Launch rviz with robot being able to navigate on a given map (from map_file: parameter)
+
+4R) rosrun assistant_action main_script.py
+
+Command for assistant to navigate on a map from his current location to the point stated in the main_script.py (for now - 'x': -2.16564114295, 'y': -5.48124138424)  
