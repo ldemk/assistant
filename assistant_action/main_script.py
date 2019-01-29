@@ -31,7 +31,7 @@ def move_base(x, y, client):
 client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
 client.wait_for_server()
 rospy.loginfo("Before movebase")
-coords = {'x': -2.16564114295, 'y': -5.48124138424}
+coords = {'x': 0.76564114295, 'y': 1.048124138424}
 
 result = move_base(coords['x'], coords['y'], client)
 rospy.loginfo(result)

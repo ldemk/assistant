@@ -90,7 +90,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## * In the file package.xml:
 ##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
 ## * In this file (CMakeLists.txt):
-##   * add "dynamic_reconfigure" to
+##   * add "dynamic_recon`igure" to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
@@ -171,6 +171,13 @@ include_directories(
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+install(PROGRAMS
+  scripts/main_script
+  scripts/auth
+  scripts/communication_db
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
