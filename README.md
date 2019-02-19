@@ -36,6 +36,8 @@ Turtlebot(Raspberry): Tx, (x=A,B,C,...)
 
 Turtlebot is controller using ROS which is installed both on PC and Raspberry.
 
+
+
 To execute the bringup sequence You have to perform the following steps:
 
 
@@ -47,9 +49,9 @@ To execute the bringup sequence You have to perform the following steps:
 
 Connect to RPI (note that IP address might be different - this depends on network settings)
 
-2R) ssh pi@192.168.43.216
+2R) ssh ubuntu@10.42.0.1
 
-(Password: turtlebot)
+(Password: ubuntu)
 
 Now You have a separeate window inside the terminator that controlles Raspberry, therefore Tx notation corresponds to input into this window.
 
@@ -82,12 +84,18 @@ Type pycharm to run PyCharm-community
 
 
 # Troubleshooting
+## time mismatch
+convinient way to overcome issues with timer mismatch (as turtlebot wifi is isolated from external webserver for date-time verification)
+when sshed to turtlebot run:
+date --set="$(ssh user@server date)"
+where <user@server> is your PC user and IP in Turtle's local network with appropriate time running
+
 See wiki for Troubleshooting
 
 # Start working with assistant
 
 1. ``` roscore ```  
-``` ssh pi@192.168.43.216```  
+``` ssh -Y ubuntu@10.42.0.1```  
 ``` roslaunch turtlebot3_bringup turtlebot3_robot.launch ```  
 ``` roslaunch turtlebot3_bringup turtlebot3_remote.launch ```  
 
