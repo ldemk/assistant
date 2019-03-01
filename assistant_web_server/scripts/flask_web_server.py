@@ -1,72 +1,92 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, request, send_from_directory
 import rospy
 import rospkg
-import actionlib
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from move_script import move_base, _move_base_init
+from roslaunch.loader import rosparam
+
+from move_script import move_base, move_base_init
 from communication_db import Database
-from auth import auth_error, get_coords
-print("START")
+from auth import auth_error
+rospy.loginfo("START")
 
-# Configurations & Settings
 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Configurations & Settings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#  ~~~~~~~~~~~~~FLASK APP~~~~~~~~~~~~~~
 app = Flask(__name__, static_folder='../templates')
 app.jinja_env.auto_reload = True
 app.secret_key = "super&key*secret"
 app.config['TEMPLATES_AUTO_RELOAD'] = False
 
+#  ~~~~~~~~~~~~~FIREBASE~~~~~~~~~~~~~~
 my_email = 'lazorenko@ucu.edu.ua'         # only for registered users
 my_id = 'Q4LaAPTNL4cHNsZJO24IoTvlh2I2'
 db = Database(my_email, my_id)   # Instance of database-wrappig class for communication with the firebase.
 
-rospy.loginfo("move_base_init")
-rospy.init_node('web_server_node')   # disable_signals=True
+
+rospy.init_node('web_server_node')  # Initialize a node for the web server.
 rospy.loginfo("web_server_node initialized")
+
 rospack = rospkg.RosPack()
 rate = rospy.Rate(10.0)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# Main Web-App
-
-@app.route('/', methods=["GET", "POST"])
+@app.route('/', methods=["GET", "POST"])        # Log in for more secure using.
 def start():
     if request.method == "POST":
         if not auth_error(request.form.get("user_name"), request.form.get("password")):
-            return  send_from_directory(app.static_folder, "search.html")
+            return send_from_directory(app.static_folder, "search.html")
         else:
             return send_from_directory(app.static_folder, "main.html")
     return send_from_directory(app.static_folder, "main.html")
 
 
-@app.route('/search', methods=["GET", "POST"])
+@app.route('/search', methods=["GET", "POST"])   # Search for worker, get coords, start Assistant.
 def search():
     if request.method == "POST":
         worker = request.form.get("person")
         if worker:
             first_name, last_name = tuple(worker.split(' '))     # e.g.: ("Branden", "Ciesla")
             if db.employee_is_available(first_name, last_name):
+
+                # change goal tolerance params to
+                if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
+                    rosparam.set_param('yaw_goal_tolerance', 3.14)
+                    rosparam.set_parem('xy_goal_tolerance', 0.55)
+
                 x_coord, y_coord = db.coordinate_x(first_name, last_name), db.coordinate_y(first_name, last_name)
-                client = _move_base_init()
+                client = move_base_init()
                 client.wait_for_server()
-                move_base(x_coord * 8, y_coord * 20, client)
-                return send_from_directory(app.static_folder, "assistant.html")
+                move_base(x_coord, y_coord, client)
+                return send_from_directory(app.static_folder, "ask_next.html")
             else:
                 return send_from_directory(app.static_folder, "busy.html")
     return send_from_directory(app.static_folder, "search.html")
 
 
-app.run(debug=True,
-        use_reloader=False)
+@app.route('/end', methods=["GET", "POST"])     # End session, send Assistant home.
+def end():
+    x_home_coord, y__home_coord = db.coordinate_x("Home", "Divanchiki"), db.coordinate_y("Home", "Divanchiki")
+    if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
+        rosparam.set_param('yaw_goal_tolerance', 0.3)
+        rosparam.set_parem('xy_goal_tolerance', 0.05)
+    client = move_base_init()
+    client.wait_for_server()
+    move_base(x_home_coord, y__home_coord, client)
+    return send_from_directory(app.static_folder, "end.html")
 
 
+app.run(use_reloader=False,
+        debug=True)
 
-#ToDo:
+
+# ToDo:
 # add custom messages into templates
-    # succ_msg = request.form.get("user_name")
-    # fail_msg = "Wrong passwod or userame, try again."
-    # init_msg = "Welcome!"
+# succ_msg = request.form.get("user_name")
+# fail_msg = "Wrong passwod or userame, try again."
+# init_msg = "Welcome!"
 
-# parametrise execfile('move_script.py')
+# ? subprocess.call(['./abc.py', arg1, arg2])
 
-# subprocess.call(['./abc.py', arg1, arg2])
+# rospy.init_node('web_server_node', disable_signals=True)

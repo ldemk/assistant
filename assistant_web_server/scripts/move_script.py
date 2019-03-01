@@ -6,7 +6,7 @@ from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
 
 
 def move_base(x, y, client):
-    print("base is moving")
+    rospy.loginfo("Starting move_base script.")
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = "map"
     goal.target_pose.header.stamp = rospy.Time.now()
@@ -21,8 +21,9 @@ def move_base(x, y, client):
     else:
         return client.get_result()
 
-def _move_base_init():
+def move_base_init():
     client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+    rospy.loginfo("Initialized move_base successfully.")
     return client
 
 
