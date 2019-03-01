@@ -10,12 +10,3 @@ def auth_error(username, password):
         return -2
     except KeyError:
         return -1
-
-
-def get_coords(name):
-    if name == "Brad Thaxton":
-        coords = {'x': -2.16564114295, 'y': -5.48124138424}
-    else:
-        coords = {'x': -5.16564114295, 'y': -1.48124138424}
-
-        return coords
