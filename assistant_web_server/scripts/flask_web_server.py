@@ -23,7 +23,7 @@ my_email = 'lazorenko@ucu.edu.ua'         # only for registered users
 my_id = 'Q4LaAPTNL4cHNsZJO24IoTvlh2I2'
 db = Database(my_email, my_id)   # Instance of database-wrappig class for communication with the firebase.
 
-
+#  ~~~~~~~~~~~~~WEB-SERVER-NODE~~~~~~~~~~~~~~
 rospy.init_node('web_server_node')  # Initialize a node for the web server.
 rospy.loginfo("web_server_node initialized")
 
