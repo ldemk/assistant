@@ -5,8 +5,9 @@ import rospkg
 from roslaunch.loader import rosparam
 
 from move_script import move_base, move_base_init
-from communication_db import Database
-from auth import auth_error
+from assistant_database.db_employees import EmployeesDB
+from assistant_database import config
+from auth import auth_check
 rospy.loginfo("START")
 
 
@@ -19,9 +20,7 @@ app.secret_key = "super&key*secret"
 app.config['TEMPLATES_AUTO_RELOAD'] = False
 
 #  ~~~~~~~~~~~~~FIREBASE~~~~~~~~~~~~~~
-my_email = 'lazorenko@ucu.edu.ua'         # only for registered users
-my_id = 'Q4LaAPTNL4cHNsZJO24IoTvlh2I2'
-db = Database(my_email, my_id)   # Instance of database-wrappig class for communication with the firebase.
+db = EmployeesDB(config.my_email, config.my_key)   # Instance of database-wrappig class for communication with the firebase.
 
 #  ~~~~~~~~~~~~~WEB-SERVER-NODE~~~~~~~~~~~~~~
 rospy.init_node('web_server_node')  # Initialize a node for the web server.
@@ -35,9 +34,10 @@ rate = rospy.Rate(10.0)
 @app.route('/', methods=["GET", "POST"])        # Log in for more secure using.
 def start():
     if request.method == "POST":
-        if not auth_error(request.form.get("user_name"), request.form.get("password")):
-            return send_from_directory(app.static_folder, "search.html")
-        else:
+        try:
+            if not auth_check(request.form.get("user_name"), request.form.get("password")):
+                return send_from_directory(app.static_folder, "search.html")
+        except ():
             return send_from_directory(app.static_folder, "main.html")
     return send_from_directory(app.static_folder, "main.html")
 

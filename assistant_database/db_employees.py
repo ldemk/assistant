@@ -1,11 +1,9 @@
-from firebase import firebase
+from db_assistant import Database
 
 
-class Database:
-    def __init__(self, user_email, user_id):
-        self.database = firebase.FirebaseApplication('https://assistant-c2e8c.firebaseio.com/', authentication=None)
-        authentication = firebase.FirebaseAuthentication(user_id, user_email)
-        firebase.authentication = authentication
+class EmployeesDB(Database):
+    def __init__(self, user_email, user_key):
+        Database.__init__(self, user_email, user_key)
         self.employees = '/employees'
         self.locations = '/locations_id'
         self.coordinates = '/coordinates_id'
@@ -58,7 +56,3 @@ class Database:
         :return: coordinate y of employee
         """
         return self._coordinates(first_name, last_name)['y']
-
-
-
-
