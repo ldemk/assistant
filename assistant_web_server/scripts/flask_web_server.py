@@ -7,6 +7,7 @@ from roslaunch.loader import rosparam
 from move_script import move_base, move_base_init
 from assistant_database.db_employees import EmployeesDB
 from assistant_database import config
+from assistant_database.admin_db_employees import EmployeeDoesNotExists
 from auth import auth_check
 rospy.loginfo("START")
 
@@ -48,19 +49,23 @@ def search():
         worker = request.form.get("person")
         if worker:
             first_name, last_name = tuple(worker.split(' '))     # e.g.: ("Branden", "Ciesla")
-            if db.employee_is_available(first_name, last_name):
+            try:
+                if db.employee_is_available(first_name, last_name):
 
-                # change goal tolerance params to
-                if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
-                    rosparam.set_param('yaw_goal_tolerance', 3.14)
-                    rosparam.set_parem('xy_goal_tolerance', 0.55)
+                    # change goal tolerance params to
+                    if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
+                        rosparam.set_param('yaw_goal_tolerance', 3.14)
+                        rosparam.set_parem('xy_goal_tolerance', 0.55)
 
-                x_coord, y_coord = db.coordinate_x(first_name, last_name), db.coordinate_y(first_name, last_name)
-                client = move_base_init()
-                client.wait_for_server()
-                move_base(x_coord, y_coord, client)
-                return send_from_directory(app.static_folder, "ask_next.html")
-            else:
+                    x_coord, y_coord = db.coordinate_x(first_name, last_name), db.coordinate_y(first_name, last_name)
+                    client = move_base_init()
+                    client.wait_for_server()
+                    move_base(x_coord, y_coord, client)
+                    return send_from_directory(app.static_folder, "ask_next.html")
+                else:
+                    return send_from_directory(app.static_folder, "busy.html")
+            except EmployeeDoesNotExists:
+                # TODO: return page when entered user does not exist in database
                 return send_from_directory(app.static_folder, "busy.html")
     return send_from_directory(app.static_folder, "search.html")
 

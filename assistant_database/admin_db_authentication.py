@@ -49,6 +49,8 @@ class AdminDBAuthentication(Database):
         :param username: username waiting to be deleted
         :return: None
         """
+        if self._user_info(username) is None:
+            raise UserDoesNotExists
         user_info = self._user_info(username)
         password_id = user_info['password_id']
         valid_date_id = user_info['valid_date_id']
@@ -88,6 +90,8 @@ class AdminDBAuthentication(Database):
         """
         if not ('username' in user and 'password' in user and 'privilege' in user):
             return False
+        if self._user_info(user['username']) is not None:
+            raise UserExists
         current_id = self._next_id()
         self.database.put('{}/{}'.format(self.authentication, self.users), user['username'],
                           {u'password_id': current_id,
@@ -156,6 +160,10 @@ class AdminDBAuthentication(Database):
             return 1
         else:
             return 0
+
+
+class UserExists(Exception):
+    pass
 
 
 class UserDoesNotExists(Exception):
