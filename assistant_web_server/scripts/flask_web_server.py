@@ -21,10 +21,10 @@ app.config['TEMPLATES_AUTO_RELOAD'] = False
 #  ~~~~~~~~~~~~~FIREBASE~~~~~~~~~~~~~~
 my_email = 'lazorenko@ucu.edu.ua'         # only for registered users
 my_id = 'Q4LaAPTNL4cHNsZJO24IoTvlh2I2'
-db = Database(my_email, my_id)   # Instance of database-wrappig class for communication with the firebase.
+db = Database(my_email, my_id)            # Instance of database-wrapping class for communication with the firebase.
 
 #  ~~~~~~~~~~~~~WEB-SERVER-NODE~~~~~~~~~~~~~~
-rospy.init_node('web_server_node')  # Initialize a node for the web server.
+rospy.init_node('web_server_node')        # Initialize a node for the web server.
 rospy.loginfo("web_server_node initialized")
 
 rospack = rospkg.RosPack()
@@ -53,7 +53,8 @@ def search():
                 # change goal tolerance params to
                 if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
                     rosparam.set_param('yaw_goal_tolerance', 3.14)
-                    rosparam.set_parem('xy_goal_tolerance', 0.55)
+                    rosparam.set_param('xy_goal_tolerance', 0.55)
+                    rosparam.get_param('xy_goal_tolerance')
 
                 x_coord, y_coord = db.coordinate_x(first_name, last_name), db.coordinate_y(first_name, last_name)
                 client = move_base_init()
@@ -67,18 +68,37 @@ def search():
 
 @app.route('/end', methods=["GET", "POST"])     # End session, send Assistant home.
 def end():
-    x_home_coord, y__home_coord = db.coordinate_x("Home", "Divanchiki"), db.coordinate_y("Home", "Divanchiki")
+    # change back goal tolerance params
     if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
         rosparam.set_param('yaw_goal_tolerance', 0.3)
-        rosparam.set_parem('xy_goal_tolerance', 0.05)
+        rosparam.set_param('xy_goal_tolerance', 0.05)
+        rosparam.get_param('xy_goal_tolerance')
     client = move_base_init()
     client.wait_for_server()
+
+    x_home_coord, y__home_coord = db.coordinate_x("Home", "Divanchiki"), db.coordinate_y("Home", "Divanchiki")
     move_base(x_home_coord, y__home_coord, client)
     return send_from_directory(app.static_folder, "end.html")
 
+@app.route('/shutdown', methods=['GET', 'POST'])
+def shutdown():
+    # raise RuntimeError("... intentially shutting down web_server (by admin)...")
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
-app.run(use_reloader=False,
-        debug=True)
+    return "Web_server shut down successfully."
+
+
+if __name__ == "__main__":
+    try:
+        app.run(use_reloader=False, debug=True)
+    except RuntimeError, exc_msg:
+        if exc_msg == "Not running with the Werkzeug Server":
+            print(exc_msg)
+    else:
+        print("Web_server was shut down successfully.")
 
 
 # ToDo:
@@ -90,3 +110,5 @@ app.run(use_reloader=False,
 # ? subprocess.call(['./abc.py', arg1, arg2])
 
 # rospy.init_node('web_server_node', disable_signals=True)
+
+# handle exception in db (db.employee_exists)
