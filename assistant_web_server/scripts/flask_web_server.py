@@ -5,8 +5,10 @@ import rospkg
 from roslaunch.loader import rosparam
 
 from move_script import move_base, move_base_init
-from communication_db import Database
-from auth import auth_error
+from assistant_database.db_employees import EmployeesDB
+from assistant_database import config
+from assistant_database.admin_db_employees import EmployeeDoesNotExists
+from auth import auth_check
 rospy.loginfo("START")
 
 
@@ -19,12 +21,10 @@ app.secret_key = "super&key*secret"
 app.config['TEMPLATES_AUTO_RELOAD'] = False
 
 #  ~~~~~~~~~~~~~FIREBASE~~~~~~~~~~~~~~
-my_email = 'lazorenko@ucu.edu.ua'         # only for registered users
-my_id = 'Q4LaAPTNL4cHNsZJO24IoTvlh2I2'
-db = Database(my_email, my_id)            # Instance of database-wrapping class for communication with the firebase.
+db = EmployeesDB(config.my_email, config.my_key)   # Instance of database-wrappig class for communication with the firebase.
 
 #  ~~~~~~~~~~~~~WEB-SERVER-NODE~~~~~~~~~~~~~~
-rospy.init_node('web_server_node')        # Initialize a node for the web server.
+rospy.init_node('web_server_node')  # Initialize a node for the web server.
 rospy.loginfo("web_server_node initialized")
 
 rospack = rospkg.RosPack()
@@ -35,9 +35,10 @@ rate = rospy.Rate(10.0)
 @app.route('/', methods=["GET", "POST"])        # Log in for more secure using.
 def start():
     if request.method == "POST":
-        if not auth_error(request.form.get("user_name"), request.form.get("password")):
-            return send_from_directory(app.static_folder, "search.html")
-        else:
+        try:
+            if not auth_check(request.form.get("user_name"), request.form.get("password")):
+                return send_from_directory(app.static_folder, "search.html")
+        except ():
             return send_from_directory(app.static_folder, "main.html")
     return send_from_directory(app.static_folder, "main.html")
 
@@ -48,57 +49,41 @@ def search():
         worker = request.form.get("person")
         if worker:
             first_name, last_name = tuple(worker.split(' '))     # e.g.: ("Branden", "Ciesla")
-            if db.employee_is_available(first_name, last_name):
+            try:
+                if db.employee_is_available(first_name, last_name):
 
-                # change goal tolerance params to
-                if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
-                    rosparam.set_param('yaw_goal_tolerance', 3.14)
-                    rosparam.set_param('xy_goal_tolerance', 0.55)
-                    rosparam.get_param('xy_goal_tolerance')
+                    # change goal tolerance params to
+                    if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
+                        rosparam.set_param('yaw_goal_tolerance', 3.14)
+                        rosparam.set_parem('xy_goal_tolerance', 0.55)
 
-                x_coord, y_coord = db.coordinate_x(first_name, last_name), db.coordinate_y(first_name, last_name)
-                client = move_base_init()
-                client.wait_for_server()
-                move_base(x_coord, y_coord, client)
-                return send_from_directory(app.static_folder, "ask_next.html")
-            else:
+                    x_coord, y_coord = db.coordinate_x(first_name, last_name), db.coordinate_y(first_name, last_name)
+                    client = move_base_init()
+                    client.wait_for_server()
+                    move_base(x_coord, y_coord, client)
+                    return send_from_directory(app.static_folder, "ask_next.html")
+                else:
+                    return send_from_directory(app.static_folder, "busy.html")
+            except EmployeeDoesNotExists:
+                # TODO: return page when entered user does not exist in database
                 return send_from_directory(app.static_folder, "busy.html")
     return send_from_directory(app.static_folder, "search.html")
 
 
 @app.route('/end', methods=["GET", "POST"])     # End session, send Assistant home.
 def end():
-    # change back goal tolerance params
+    x_home_coord, y__home_coord = db.coordinate_x("Home", "Divanchiki"), db.coordinate_y("Home", "Divanchiki")
     if rospy.has_param('yaw_goal_tolerance') and rospy.has_param('xy_goal_tolerance'):
         rosparam.set_param('yaw_goal_tolerance', 0.3)
-        rosparam.set_param('xy_goal_tolerance', 0.05)
-        rosparam.get_param('xy_goal_tolerance')
+        rosparam.set_parem('xy_goal_tolerance', 0.05)
     client = move_base_init()
     client.wait_for_server()
-
-    x_home_coord, y__home_coord = db.coordinate_x("Home", "Divanchiki"), db.coordinate_y("Home", "Divanchiki")
     move_base(x_home_coord, y__home_coord, client)
     return send_from_directory(app.static_folder, "end.html")
 
-@app.route('/shutdown', methods=['GET', 'POST'])
-def shutdown():
-    # raise RuntimeError("... intentially shutting down web_server (by admin)...")
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
 
-    return "Web_server shut down successfully."
-
-
-if __name__ == "__main__":
-    try:
-        app.run(use_reloader=False, debug=True)
-    except RuntimeError, exc_msg:
-        if exc_msg == "Not running with the Werkzeug Server":
-            print(exc_msg)
-    else:
-        print("Web_server was shut down successfully.")
+app.run(use_reloader=False,
+        debug=True)
 
 
 # ToDo:
@@ -110,5 +95,3 @@ if __name__ == "__main__":
 # ? subprocess.call(['./abc.py', arg1, arg2])
 
 # rospy.init_node('web_server_node', disable_signals=True)
-
-# handle exception in db (db.employee_exists)
