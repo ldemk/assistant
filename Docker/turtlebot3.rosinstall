@@ -15,5 +15,4 @@
 
 - git:
     uri: https://github.com/ldemk/assistant.git
-    version: kinetic-devel
     local-name: assistant
